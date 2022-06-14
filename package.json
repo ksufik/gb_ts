@@ -1,18 +1,13 @@
 {
-  "name": "gb",
+  "name": "gb_ts",
   "version": "1.0.0",
-  "main": "public/scripts/index.js",
+  "main": "scripts/index.js",
   "scripts": {
     "build": " rd -r public\\scripts 2>null & tsc",
     "build:dev": "rd -r public\\scripts 2>null & tsc -p tsconfig-dev.json",
-    "lint": "eslint src --ext .js --ext .ts",
-    "lint-fix": "eslint src --ext .js --ext .ts --fix",
-    "start": "http-server -p 3000"
+    "start": "http-server -c-1 -p 3000"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.27.1",
-    "@typescript-eslint/parser": "^5.27.1",
-    "eslint": "^8.17.0",
     "http-server": "^14.1.1",
     "typescript": "^4.7.3"
   }
