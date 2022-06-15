@@ -56,16 +56,40 @@ function getDate(dateType: string) {
   }
 }
 
-export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = getDate('checkOut')) {
+function handleSubmit() {
+
+  return null
+}
+//как создавать обработчики в ts? в запросах только ts + react
+function test(e) {
+  return console.log(e);
+}
+
+interface ISearchFormData {
+  city: string
+  ckeckIn: string
+  ckeckOut: string
+  maxPrice: number
+}
+
+const reguest: ISearchFormData = {
+  city: "Санкт-Петербург",
+  ckeckIn: "2022-11-26",
+  ckeckOut: "2022-11-29",
+  maxPrice: 800
+}
+
+
+export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = reguest.ckeckOut) {
   renderBlock(
     'search-form-block',
     `
-    <form>
+    <form ${onclick = handleSubmit()}>
       <fieldset class="search-filedset">
         <div class="row">
           <div>
             <label for="city">Город</label>
-            <input id="city" type="text" disabled value="Санкт-Петербург" />
+            <input id="city" type="text" disabled value=${reguest.city} />${console.log('checkIn: ', checkIn)}
             <input type="hidden" disabled value="59.9386,30.3141" />
           </div>
           <!--<div class="providers">
@@ -76,7 +100,7 @@ export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = g
         <div class="row">
           <div>
             <label for="check-in-date">Дата заезда</label>
-            <input id="check-in-date" type="date" value=${checkIn} min=${getDate('min')} max=${getDate('max')} name="checkin" />
+            <input id="check-in-date" type="date" value=${checkIn} min=${getDate('min')} max=${getDate('max')} name="checkin" ${onchange = { test(checkIn) }}}/>
           </div>
           <div>
             <label for="check-out-date">Дата выезда</label>
@@ -84,7 +108,7 @@ export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = g
           </div>
           <div>
             <label for="max-price">Макс. цена суток</label>
-            <input id="max-price" type="text" value="" name="price" class="max-price" />
+            <input id="max-price" type="text" value=${reguest.maxPrice} name="price" class="max-price" />
           </div>
           <div>
             <div><button>Найти</button></div>
