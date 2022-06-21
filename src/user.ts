@@ -1,16 +1,33 @@
 import { renderBlock } from './lib.js'
 
+
+//для простоты оставила так..
 export const USER = {
   username: 'Wade Warren',
   avatarUrl: '/img/avatar.png'
 }
-// не поняла из какого localStorage надо было это взять и как правильно сделать
+
+//если делать таким способом, то потом надо строку преобразовывать в объект. Я не придумала, как это сделать. Поэтому согласно заданию, функция читает из localStorage, но это нигда не применяется.
+//Без setItem возвращается null
+localStorage.setItem('user', '{username: "Wade Warren", avatarUrl: "/img/avatar.png"}');
+
+
+
 export function getUserData(user: unknown) {
+  // зачем нужно было читать именно из localStorage?
+
+  // let user = localStorage.getItem('user');
+  // let userObj = (user);
+  // return userObj;
+
   if (user === Object) {
-    return user;
+    return null;
   }
+
   return user.toString();
+
 }
+
 
 export function getFavoritesAmount(favoritesAmount: unknown) {
   if (favoritesAmount === Number) {
