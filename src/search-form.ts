@@ -7,7 +7,7 @@ function getLastDayOfMonth(year: number, month: number) {
   return date.getDate();
 }
 
-function getDate(dateType: string) {
+export function getDate(dateType: string) {
   let currentDate = new Date(Date.now()).toLocaleDateString();
   let curDateArr = currentDate.split(".");
   let [currentDay, currentMonth, currentYear] = curDateArr;
@@ -58,36 +58,34 @@ function getDate(dateType: string) {
   }
 }
 
-function handleSubmit() {
-
-  return null
-}
-//как создавать обработчики в ts? в запросах только ts + react
-function test(e) {
-  // return console.log(e);
-  e.preventDefault();
-  console.log('test');
+enum allowedFormData {
+  city = 'city',
+  checkIn = 'checkIn',
+  checkOut = 'checkOut',
+  price = 'price',
 }
 
-
-
-interface ISearchFormData {
+export interface ISearchFormData {
   city: string
-  ckeckIn: string
-  ckeckOut: string
-  maxPrice: number
+  checkIn: string
+  checkOut: string
+  price: number
 }
 
 const reguest: ISearchFormData = {
   city: "Санкт-Петербург",
-  ckeckIn: "2022-11-26",
-  ckeckOut: "2022-11-29",
-  maxPrice: 800
+  checkIn: "2022-11-26",
+  checkOut: "2022-11-29",
+  price: 800
 }
 
-// onclick="test()"
 
-export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = reguest.ckeckOut) {
+export function search(data: ISearchFormData): void {
+  console.log('search data: ', data);
+}
+
+
+export function renderSearchFormBlock(formData: ISearchFormData) {
   renderBlock(
     'search-form-block',
     `
@@ -96,23 +94,23 @@ export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = r
       <fieldset class="search-filedset">
         <div class="row">
           <div>
-            <label for="city">Город</label>
-            <input id="city" type="text" disabled value=${reguest.city} />
+            <label for=${allowedFormData.city}>Город</label>
+            <input id=${allowedFormData.city} type="text" disabled value=${formData.city} />
             <input type="hidden" disabled value="59.9386,30.3141" />
           </div>
         </div>
         <div class="row">
           <div>
             <label for="check-in-date">Дата заезда</label>
-            <input id="check-in-date" type="date" value=${checkIn} min=${getDate('min')} max=${getDate('max')} name="checkin" }/>
+            <input id="check-in-date" type="date" value=${formData.checkIn} min=${getDate('min')} max=${getDate('max')} name=${allowedFormData.checkIn} }/>
           </div>
           <div>
             <label for="check-out-date">Дата выезда</label>
-            <input id="check-out-date" type="date" value=${checkOut} min=${getDate('min')} max=${getDate('max')} name="checkout" />
+            <input id="check-out-date" type="date" value=${getDate('checkOut')} min=${getDate('min')} max=${getDate('max')} name=${allowedFormData.checkOut} />
           </div>
           <div>
             <label for="max-price" >Макс. цена суток</label>
-            <input id="max-price" type="text" value=${reguest.maxPrice} name="price" class="max-price" />
+            <input id="max-price" type="text" value=${formData.price} name=${allowedFormData.price} class="max-price" />
           </div>
           <div>
             <div id="btn-search"><button>Найти</button></div>
@@ -124,18 +122,6 @@ export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = r
   )
 }
 
-
-// form.addEventListener('change', function (e) {
-//   // тут можно будет работать с полями формы
-//   console.log(e);
-// })
-
-
-// const btnSearch = document.getElementById("btn-search");
-// btnSearch.addEventListener<"click">("click", (event: MouseEvent) => {
-//   event.preventDefault();
-//   fetchPlaces();
-// })
 
 function fetchPlaces() {
   fetch(BASE_URL + '/places/1')
