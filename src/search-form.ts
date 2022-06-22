@@ -92,7 +92,7 @@ export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = r
     'search-form-block',
     `
    
-    <form class="form">
+    <form id="form">
       <fieldset class="search-filedset">
         <div class="row">
           <div>
@@ -100,10 +100,6 @@ export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = r
             <input id="city" type="text" disabled value=${reguest.city} />
             <input type="hidden" disabled value="59.9386,30.3141" />
           </div>
-          <!--<div class="providers">
-            <label><input type="checkbox" name="provider" value="homy" checked /> Homy</label>
-            <label><input type="checkbox" name="provider" value="flat-rent" checked /> FlatRent</label>
-          </div>--!>
         </div>
         <div class="row">
           <div>
@@ -128,8 +124,6 @@ export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = r
   )
 }
 
-const form = document.querySelector('.form');
-console.log(form);
 
 // form.addEventListener('change', function (e) {
 //   // тут можно будет работать с полями формы
@@ -137,11 +131,11 @@ console.log(form);
 // })
 
 
-const btnSearch = document.getElementById("btn-search");
-btnSearch.addEventListener<"click">("click", (event: MouseEvent) => {
-  event.preventDefault();
-  fetchPlaces();
-})
+// const btnSearch = document.getElementById("btn-search");
+// btnSearch.addEventListener<"click">("click", (event: MouseEvent) => {
+//   event.preventDefault();
+//   fetchPlaces();
+// })
 
 function fetchPlaces() {
   fetch(BASE_URL + '/places/1')

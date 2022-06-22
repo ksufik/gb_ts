@@ -12,3 +12,23 @@ window.addEventListener('DOMContentLoaded', () => {
     { name: 'Понял', handler: () => { console.log('Уведомление закрыто') } }
   )
 })
+
+/** Брать элементы из DOM тогда когда они появились в нём, т.е. после всех ф-ций рендер*/
+const state = {}
+const form = document.getElementById('form')
+const btnSearch = document.getElementById('btn-search')
+
+// form.addEventListener('change', function (e: Event) {
+//   const valueControl = (e.target as HTMLFormElement).value
+//   const nameControl = (e.target as HTMLFormElement).name
+
+//   state[nameControl] = valueControl
+
+//   console.log('state', state);
+// })
+
+btnSearch.addEventListener('click', function (e: MouseEvent) {
+  e.preventDefault()
+  console.log('state', state);
+
+})
