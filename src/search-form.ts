@@ -1,4 +1,7 @@
 import { renderBlock } from './lib.js'
+import { ONE_MONTH, ONE_DAY, TWO_DAY } from './constants.js'
+import { BASE_URL } from './API/index.js'
+import { renderSearchResultsBlock } from './search-results.js';
 
 function getLastDayOfMonth(year: number, month: number) {
   let date = new Date(year, month, 0);
@@ -19,11 +22,11 @@ function getDate(dateType: string) {
   switch (dateType) {
     //проверка на последний день в месяце
     case 'checkIn':
-      let checkInDate = currentDateNum + 1;
+      let checkInDate = currentDateNum + ONE_DAY;
       let checkInMonth = currentMonthNum;
       if (checkInDate > lastDay) {
         checkInDate = checkInDate - lastDay;
-        checkInMonth += 1;
+        checkInMonth += ONE_MONTH;
       }
       let checkInDateStr = checkInDate < 10 ? "0" + String(checkInDate) : String(checkInDate);
       let checkInMonthStr = checkInMonth < 10 ? "0" + String(checkInMonth) : String(checkInMonth);
@@ -35,19 +38,19 @@ function getDate(dateType: string) {
       return curDateArr.join('-');
 
     case 'max':
-      let nextMonth = currentMonthNum + 1;
+      let nextMonth = currentMonthNum + ONE_MONTH;
       let nextMonthStr = nextMonth < 10 ? "0" + String(nextMonth) : String(nextMonth)
-      let lastDayOfNextMonth = getLastDayOfMonth(currentYearNum, currentMonthNum + 1)
+      let lastDayOfNextMonth = getLastDayOfMonth(currentYearNum, currentMonthNum + ONE_MONTH)
       return [currentYear, nextMonthStr, lastDayOfNextMonth].join('-');
 
 
     case 'checkOut':
-      let checkOutDate = currentDateNum + 3;
+      let checkOutDate = currentDateNum + TWO_DAY + TWO_DAY;
       let checkOutMonth = currentMonthNum;
       //проверка на последнее число месяца
       if (checkOutDate > lastDay) {
         checkOutDate = checkOutDate - lastDay;
-        checkOutMonth += 1;
+        checkOutMonth += ONE_MONTH;
       }
       let checkOutMonthStr = checkOutMonth < 10 ? "0" + String(checkOutMonth) : String(checkOutMonth);
       let checkOutDateStr = checkOutDate < 10 ? "0" + String(checkOutDate) : String(checkOutDate);
@@ -56,42 +59,109 @@ function getDate(dateType: string) {
   }
 }
 
-export function renderSearchFormBlock(checkIn = getDate('checkIn'), checkOut = getDate('checkOut')) {
+enum EFormData {
+  city = 'city',
+  checkIn = 'checkIn',
+  checkOut = 'checkOut',
+  price = 'price',
+}
+
+export let formData: ISearchFormData = {
+  city: "Санкт-Петербург",
+  checkIn: getDate('checkIn'),
+  checkOut: getDate('checkOut'),
+  price: 0
+}
+
+interface ISearchFormData {
+  city: string
+  checkIn: string
+  checkOut: string
+  price: number
+}
+
+
+
+function search(data: ISearchFormData): void {
+  console.log('search data: ', data);
+}
+
+
+
+
+export function renderSearchFormBlock(formData: ISearchFormData) {
   renderBlock(
     'search-form-block',
     `
-    <form>
+   
+    <form id="form">
       <fieldset class="search-filedset">
         <div class="row">
           <div>
-            <label for="city">Город</label>
-            <input id="city" type="text" disabled value="Санкт-Петербург" />
+            <label for=${EFormData.city}>Город</label>
+            <input id=${EFormData.city} type="text" disabled value=${formData.city} />
             <input type="hidden" disabled value="59.9386,30.3141" />
           </div>
-          <!--<div class="providers">
-            <label><input type="checkbox" name="provider" value="homy" checked /> Homy</label>
-            <label><input type="checkbox" name="provider" value="flat-rent" checked /> FlatRent</label>
-          </div>--!>
         </div>
         <div class="row">
           <div>
             <label for="check-in-date">Дата заезда</label>
-            <input id="check-in-date" type="date" value=${checkIn} min=${getDate('min')} max=${getDate('max')} name="checkin" />
+            <input id="check-in-date" type="date" value=${formData.checkIn} min=${getDate('min')} max=${getDate('max')} name=${EFormData.checkIn} }/>
           </div>
           <div>
             <label for="check-out-date">Дата выезда</label>
-            <input id="check-out-date" type="date" value=${checkOut} min=${getDate('min')} max=${getDate('max')} name="checkout" />
+            <input id="check-out-date" type="date" value=${getDate('checkOut')} min=${getDate('min')} max=${getDate('max')} name=${EFormData.checkOut} />
           </div>
           <div>
-            <label for="max-price">Макс. цена суток</label>
-            <input id="max-price" type="text" value="" name="price" class="max-price" />
+            <label for="max-price" >Макс. цена суток</label>
+            <input id="max-price" type="text" value=${formData.price} name=${EFormData.price} class="max-price" />
           </div>
           <div>
-            <div><button>Найти</button></div>
+            <div id="btn-search"><button>Найти</button></div>
           </div>
         </div>
       </fieldset>
     </form>
     `
   )
+
+  /** Брать элементы из DOM тогда когда они появились в нём, т.е. после всех ф-ций рендер*/
+  const form = document.getElementById('form')
+  const btnSearch = document.getElementById('btn-search')
+
+  form.addEventListener('change', function (e: Event) {
+    const valueControl = (e.target as HTMLFormElement).value
+    const nameControl = (e.target as HTMLFormElement).name
+
+    formData[nameControl] = valueControl
+  })
+
+  btnSearch.addEventListener('click', function (e: MouseEvent) {
+    e.preventDefault()
+
+    search(formData);
+    fetchPlaces();
+  })
+
+  let placesArr = [];
+
+  function fetchPlaces() {
+    const coordinates = '59.9386,30.3141';
+    const checkInDate = new Date(formData.checkIn).getTime();
+    const checkOutDate = new Date(formData.checkOut).getTime();
+    fetch(BASE_URL + `/places?coordinates=${coordinates}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&maxPrice=${formData.price}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error:${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        renderSearchResultsBlock(data);
+        placesArr = data;
+      })
+  }
 }
+
+
+
