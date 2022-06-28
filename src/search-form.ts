@@ -1,13 +1,14 @@
 import { renderBlock } from './lib.js'
 import { ONE_MONTH, ONE_DAY, TWO_DAY } from './constants.js'
 import { BASE_URL } from './API/index.js'
+import { renderSearchResultsBlock } from './search-results.js';
 
 function getLastDayOfMonth(year: number, month: number) {
   let date = new Date(year, month, 0);
   return date.getDate();
 }
 
-export function getDate(dateType: string) {
+function getDate(dateType: string) {
   let currentDate = new Date(Date.now()).toLocaleDateString();
   let curDateArr = currentDate.split(".");
   let [currentDay, currentMonth, currentYear] = curDateArr;
@@ -58,31 +59,34 @@ export function getDate(dateType: string) {
   }
 }
 
-enum allowedFormData {
+enum EFormData {
   city = 'city',
   checkIn = 'checkIn',
   checkOut = 'checkOut',
   price = 'price',
 }
 
-export interface ISearchFormData {
+export let formData: ISearchFormData = {
+  city: "Санкт-Петербург",
+  checkIn: getDate('checkIn'),
+  checkOut: getDate('checkOut'),
+  price: 0
+}
+
+interface ISearchFormData {
   city: string
   checkIn: string
   checkOut: string
   price: number
 }
 
-const reguest: ISearchFormData = {
-  city: "Санкт-Петербург",
-  checkIn: "2022-11-26",
-  checkOut: "2022-11-29",
-  price: 800
-}
 
 
-export function search(data: ISearchFormData): void {
+function search(data: ISearchFormData): void {
   console.log('search data: ', data);
 }
+
+
 
 
 export function renderSearchFormBlock(formData: ISearchFormData) {
@@ -94,23 +98,23 @@ export function renderSearchFormBlock(formData: ISearchFormData) {
       <fieldset class="search-filedset">
         <div class="row">
           <div>
-            <label for=${allowedFormData.city}>Город</label>
-            <input id=${allowedFormData.city} type="text" disabled value=${formData.city} />
+            <label for=${EFormData.city}>Город</label>
+            <input id=${EFormData.city} type="text" disabled value=${formData.city} />
             <input type="hidden" disabled value="59.9386,30.3141" />
           </div>
         </div>
         <div class="row">
           <div>
             <label for="check-in-date">Дата заезда</label>
-            <input id="check-in-date" type="date" value=${formData.checkIn} min=${getDate('min')} max=${getDate('max')} name=${allowedFormData.checkIn} }/>
+            <input id="check-in-date" type="date" value=${formData.checkIn} min=${getDate('min')} max=${getDate('max')} name=${EFormData.checkIn} }/>
           </div>
           <div>
             <label for="check-out-date">Дата выезда</label>
-            <input id="check-out-date" type="date" value=${getDate('checkOut')} min=${getDate('min')} max=${getDate('max')} name=${allowedFormData.checkOut} />
+            <input id="check-out-date" type="date" value=${getDate('checkOut')} min=${getDate('min')} max=${getDate('max')} name=${EFormData.checkOut} />
           </div>
           <div>
             <label for="max-price" >Макс. цена суток</label>
-            <input id="max-price" type="text" value=${formData.price} name=${allowedFormData.price} class="max-price" />
+            <input id="max-price" type="text" value=${formData.price} name=${EFormData.price} class="max-price" />
           </div>
           <div>
             <div id="btn-search"><button>Найти</button></div>
@@ -120,18 +124,44 @@ export function renderSearchFormBlock(formData: ISearchFormData) {
     </form>
     `
   )
+
+  /** Брать элементы из DOM тогда когда они появились в нём, т.е. после всех ф-ций рендер*/
+  const form = document.getElementById('form')
+  const btnSearch = document.getElementById('btn-search')
+
+  form.addEventListener('change', function (e: Event) {
+    const valueControl = (e.target as HTMLFormElement).value
+    const nameControl = (e.target as HTMLFormElement).name
+
+    formData[nameControl] = valueControl
+  })
+
+  btnSearch.addEventListener('click', function (e: MouseEvent) {
+    e.preventDefault()
+
+    search(formData);
+    fetchPlaces();
+  })
+
+  let placesArr = [];
+
+  function fetchPlaces() {
+    const coordinates = '59.9386,30.3141';
+    const checkInDate = new Date(formData.checkIn).getTime();
+    const checkOutDate = new Date(formData.checkOut).getTime();
+    fetch(BASE_URL + `/places?coordinates=${coordinates}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&maxPrice=${formData.price}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error:${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        renderSearchResultsBlock(data);
+        placesArr = data;
+      })
+  }
 }
 
 
-function fetchPlaces() {
-  fetch(BASE_URL + '/places/1')
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Error:${response.status}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log(data);
-    })
-}
+

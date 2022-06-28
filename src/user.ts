@@ -1,4 +1,5 @@
 import { renderBlock } from './lib.js'
+import { IFavorites } from './search-results.js'
 
 class User {
   username: string
@@ -23,12 +24,6 @@ localStorage.setItem('user', '{username: "Wade Warren", avatarUrl: "/img/avatar.
 
 
 export function getUserData(user: unknown): User | string {
-  // зачем нужно было читать именно из localStorage?
-
-  // let user = localStorage.getItem('user');
-  // let userObj = (user);
-  // return userObj;
-
   if (user instanceof User) {
     return user;
   }
@@ -46,28 +41,18 @@ if (userData instanceof User) {
 }
 
 
-export let favorites: number;
+//тут возникла ошибка, как правильно указать тип в faivoritesArr в search-results.ts? favoritesAmount: IFavorites?
+export function getFavoritesAmount(favoritesArr): number {
 
-export function getFavoritesAmount(favoritesAmount: unknown): string | number {
-  if (typeof favoritesAmount === 'number') {
-    return favoritesAmount;
-  }
-
-  return favoritesAmount.toString();
+  return favoritesArr.length;
 }
 
-const favoritesData = getFavoritesAmount(Math.floor(Math.random() * 100));
-if (typeof favoritesData === 'number') {
-  favorites = favoritesData;
-} else {
-  favorites = 0;
-}
 
 
 export function renderUserBlock(
   name: string,
   avatarSrc: string,
-  favoriteItemsAmount?: number
+  favoriteItemsAmount: number
 
 ) {
   const favoritesCaption = favoriteItemsAmount > 0 ? favoriteItemsAmount : 'ничего нет'
@@ -82,7 +67,7 @@ export function renderUserBlock(
       <div class="info">
           <p class="name">${name}</p>
           <p class="fav">
-            <i class="heart-icon${hasFavoriteItems ? ' active' : ''}"></i>${favoritesCaption}
+            <i id="user-faivor" class="heart-icon${hasFavoriteItems ? ' active' : ''}"></i>${favoritesCaption}
           </p>
       </div>
     </div>
