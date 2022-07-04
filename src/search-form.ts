@@ -2,6 +2,7 @@ import { renderBlock } from './lib.js'
 import { ONE_MONTH, ONE_DAY, TWO_DAY } from './constants.js'
 import { BASE_URL } from './API/index.js'
 import { renderSearchResultsBlock } from './search-results.js';
+import { FlatRentSdk, IParameters } from './flat-rent-sdk/flat-rent-sdk.js';
 
 function getLastDayOfMonth(year: number, month: number) {
   let date = new Date(year, month, 0);
@@ -82,7 +83,7 @@ interface ISearchFormData {
 
 
 
-function search(data: ISearchFormData): void {
+function searchFromAPI(data: ISearchFormData): void {
   console.log('search data: ', data);
 }
 
@@ -139,7 +140,7 @@ export function renderSearchFormBlock(formData: ISearchFormData) {
   btnSearch.addEventListener('click', function (e: MouseEvent) {
     e.preventDefault()
 
-    search(formData);
+    searchFromAPI(formData);
     fetchPlaces();
   })
 
@@ -158,8 +159,29 @@ export function renderSearchFormBlock(formData: ISearchFormData) {
       })
       .then((data) => {
         renderSearchResultsBlock(data);
-        placesArr = data;
+        // placesArr = data;
+        console.log('placesArr: ', data)
       })
+
+    fetchFlats();
+  }
+
+
+  function fetchFlats() {
+    const checkInDate = new Date(formData.checkIn);
+    const checkOutDate = new Date(formData.checkOut);
+    const flats = new FlatRentSdk;
+    const defaultParameters: IParameters = {
+      city: formData.city,
+      checkInDate: checkInDate,
+      checkOutDate: checkOutDate,
+      priceLimit: formData.price
+    }
+    let flatsArr = flats.search(defaultParameters);
+    flatsArr.then(data => {
+      console.log('flatsArr: ', data)
+      renderSearchResultsBlock(data)
+    })
   }
 }
 

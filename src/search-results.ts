@@ -1,5 +1,8 @@
+import { toggleFavoriteItem } from './favorites.js';
+import { IFormattedDatabase } from './flat-rent-sdk/flat-rent-sdk.js';
 import { renderBlock } from './lib.js'
-import { getFavoritesAmount } from './user.js'
+import { IPlace } from './results-from-api.js';
+
 
 export function renderSearchStubBlock() {
   renderBlock(
@@ -25,63 +28,25 @@ export function renderEmptyOrErrorSearchBlock(reasonMessage) {
   )
 }
 
-interface IPlace {
-  id: number,
-  bookedDates: [],
-  description: string,
-  image: string,
-  name: string,
-  price: number,
-  remoteness: number
-}
+let itemsListPlaces = '';
 
-export interface IFavorites {
-  id: string,
-  name: string,
-  img: string
-}
-
-export let faivoritesArr = [];
-export let favoritesAmount: number;
-
-function toggleFavoriteItem(id: string, name: string, img: string) {
-  const newPlace: IFavorites = {
-    id: id,
-    name: name,
-    img: img
-  }
-
-  if (faivoritesArr.find(elem => elem.id === newPlace.id)) {
-    faivoritesArr = faivoritesArr.filter(elem => elem.id != newPlace.id);
-  } else {
-    faivoritesArr.push(newPlace);
-  }
-
-
-  favoritesAmount = getFavoritesAmount(faivoritesArr);
-  console.log(favoritesAmount);
-}
-
-
-export function renderSearchResultsBlock(places: IPlace) {
-  let itemsListPlaces = '';
-
+export function renderSearchResultsBlock(places: IPlace[] | IFormattedDatabase[]) {
 
   if (Array.isArray(places) && places.length > 0) {
     places.forEach(place => {
       itemsListPlaces += `  <li class="result">
 <div class="result-container">
   <div class="result-img-container">
-    <div id=${place.id} name="${place.name}" image=${place.image} class="favorites active favorite-place"></div>
-    <img class="result-img" src=${place.image} alt=${place.name}>
+    <div id=${place.id} name="${place.name ? place.name : place.title}" image=${place.image ? place.image : place.photos[0]} class="favorites active favorite-place"></div>
+    <img class="result-img" src=${place.image ? place.image : place.photos[0]} alt=${place.name ? place.name : place.title}>
   </div>	
   <div class="result-info">
     <div class="result-info--header">
-      <p>${place.name}</p>
-      <p class="price">${place.price}</p>
+      <p>${place.name ? place.name : place.title}</p>
+      <p class="price">${place.price ? place.price : place.totalPrice}</p>
     </div>
-    <div class="result-info--map"><i class="map-icon"></i> ${place.remoteness} км от вас</div>
-    <div class="result-info--descr">${place.description}</div>
+    <div class="result-info--map"><i class="map-icon"></i> ${place.remoteness ? place.remoteness + 'км от вас' : place.coordinates} </div>
+    <div class="result-info--descr">${place.description ? place.description : place.details}</div>
     <div class="result-info--footer">
       <div>
         <button>Забронировать</button>

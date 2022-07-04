@@ -1,7 +1,8 @@
 import { formData, renderSearchFormBlock } from './search-form.js'
-import { favoritesAmount, renderSearchStubBlock } from './search-results.js'
-import { avatar, name, renderUserBlock } from './user.js'
+import { renderSearchStubBlock } from './search-results.js'
+import { name, avatar, renderUserBlock } from './user.js'
 import { renderToast } from './lib.js'
+import { favoritesAmount } from './favorites.js'
 
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -13,7 +14,6 @@ window.addEventListener('DOMContentLoaded', () => {
     { text: 'Это пример уведомления. Используйте его при необходимости', type: 'success' },
     { name: 'Понял', handler: () => { console.log('Уведомление закрыто') } }
   )
-
 
 
 })
