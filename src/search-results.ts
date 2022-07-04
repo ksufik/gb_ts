@@ -1,6 +1,10 @@
+import { toggleFavoriteItem } from './favorites.js';
+import { IFormattedDatabase } from './flat-rent-sdk/flat-rent-sdk.js';
 import { renderBlock } from './lib.js'
+import { IPlace } from './results-from-api.js';
 
-export function renderSearchStubBlock () {
+
+export function renderSearchStubBlock() {
   renderBlock(
     'search-results-block',
     `
@@ -12,7 +16,7 @@ export function renderSearchStubBlock () {
   )
 }
 
-export function renderEmptyOrErrorSearchBlock (reasonMessage) {
+export function renderEmptyOrErrorSearchBlock(reasonMessage) {
   renderBlock(
     'search-results-block',
     `
@@ -24,7 +28,35 @@ export function renderEmptyOrErrorSearchBlock (reasonMessage) {
   )
 }
 
-export function renderSearchResultsBlock () {
+let itemsListPlaces = '';
+
+export function renderSearchResultsBlock(places: IPlace[] | IFormattedDatabase[]) {
+
+  if (Array.isArray(places) && places.length > 0) {
+    places.forEach(place => {
+      itemsListPlaces += `  <li class="result">
+<div class="result-container">
+  <div class="result-img-container">
+    <div id=${place.id} name="${place.name ? place.name : place.title}" image=${place.image ? place.image : place.photos[0]} class="favorites active favorite-place"></div>
+    <img class="result-img" src=${place.image ? place.image : place.photos[0]} alt=${place.name ? place.name : place.title}>
+  </div>	
+  <div class="result-info">
+    <div class="result-info--header">
+      <p>${place.name ? place.name : place.title}</p>
+      <p class="price">${place.price ? place.price : place.totalPrice}</p>
+    </div>
+    <div class="result-info--map"><i class="map-icon"></i> ${place.remoteness ? place.remoteness + 'км от вас' : place.coordinates} </div>
+    <div class="result-info--descr">${place.description ? place.description : place.details}</div>
+    <div class="result-info--footer">
+      <div>
+        <button>Забронировать</button>
+      </div>
+    </div>
+  </div>
+</div>
+</li>`
+    })
+  }
   renderBlock(
     'search-results-block',
     `
@@ -40,49 +72,23 @@ export function renderSearchResultsBlock () {
         </div>
     </div>
     <ul class="results-list">
-      <li class="result">
-        <div class="result-container">
-          <div class="result-img-container">
-            <div class="favorites active"></div>
-            <img class="result-img" src="./img/result-1.png" alt="">
-          </div>	
-          <div class="result-info">
-            <div class="result-info--header">
-              <p>YARD Residence Apart-hotel</p>
-              <p class="price">13000&#8381;</p>
-            </div>
-            <div class="result-info--map"><i class="map-icon"></i> 2.5км от вас</div>
-            <div class="result-info--descr">Комфортный апарт-отель в самом сердце Санкт-Петербрга. К услугам гостей номера с видом на город и бесплатный Wi-Fi.</div>
-            <div class="result-info--footer">
-              <div>
-                <button>Забронировать</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
-      <li class="result">
-        <div class="result-container">
-          <div class="result-img-container">
-            <div class="favorites"></div>
-            <img class="result-img" src="./img/result-2.png" alt="">
-          </div>	
-          <div class="result-info">
-            <div class="result-info--header">
-              <p>Akyan St.Petersburg</p>
-              <p class="price">13000&#8381;</p>
-            </div>
-            <div class="result-info--map"><i class="map-icon"></i> 1.1км от вас</div>
-            <div class="result-info--descr">Отель Akyan St-Petersburg с бесплатным Wi-Fi на всей территории расположен в историческом здании Санкт-Петербурга.</div>
-            <div class="result-info--footer">
-              <div>
-                <button>Забронировать</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
     </ul>
     `
   )
+
+  const nodeListPlace = document.querySelector('.results-list');
+  nodeListPlace.insertAdjacentHTML('afterbegin', itemsListPlaces);
+
+  let favoritePlaces = document.querySelectorAll('.favorite-place');
+  favoritePlaces.forEach(favoritePlace => {
+
+    let placeId = favoritePlace.getAttribute('id');
+    let placeName = favoritePlace.getAttribute('name');
+    let placeImg = favoritePlace.getAttribute('image');
+
+    favoritePlace.addEventListener('click', function (e: MouseEvent) {
+      toggleFavoriteItem(placeId, placeName, placeImg);
+    })
+  })
+
 }
